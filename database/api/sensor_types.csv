@@ -1,0 +1,113 @@
+Lower Limit,Units,Upper Limit,Theme,Name
+,Celsius,,Weather,Max Temperature 
+,Vehicles,,Vehicles,Van Count
+,Cars,,Traffic,Cars
+,%,,Weather,Sunshine Duration
+,strain,,Building,Strain 1
+,Vehicles,,Vehicles,Bus Count
+,m,,Seismic,Vertical Displacement
+,People,,People,People Count
+,Vehicles,,Vehicles,Motorcycle Count
+,-,,Bee Hive,Mean Fanning
+,ugm3,,Air Quality,PM
+0.001,ugm -3,,Air Quality,Non-volatile PM2.5
+,m,,Seismic,East-West Horizontal Displacement
+,mm,,Sewage,Sewage Level
+0.001,db,,Noise,Sound
+,strain,,Building,Strain 2
+,%,,Soil,Moisture
+,Vehicles,,Vehicles,Cycle Count
+,m/s,,Weather,Wind Gust
+,strain,,Building,Strain 4
+,ppb,,Air Quality,VOC
+0.001,?,,Air Quality,Dust
+,Celsius,,Bee Hive,Brood
+,%,,Air Quality,allpollu
+0.001,ugm -3,,Air Quality,Volatile PM2.5
+,Vehicles,,Vehicles,Vehicle Count West
+,W/m2,,Weather,Solar Diffuse Radiation
+,Vehicles,,Vehicles,Car Count
+,Vehicles,,Vehicles,Vehicle Count
+,ugm -3,,Air Quality,Ozone Concentration
+,ugm -3,,Air Quality,NO2 Concentration
+,strain,,Building,Strain 3
+0.0001,FNU,2000.0,Water Quality,Turbidity
+,m,,Water Level,Relative Water Level
+,People,,People,Walking
+,km,,Weather,Visibility
+0.0001,%,100.0,Water Quality,Dissolved Oxygen Percentage
+,Celsius,,Water Quality,Water Temperature
+0.001,ugm -3,,Air Quality,PM1
+0.001,ugm -3,,Air Quality,PM10
+0.001,ppb,,Air Quality,NOx
+0.0001,psu,,Water Quality,Salinity
+,mm,,Weather,Rain
+0.001,ugm -3,1000.0,Air Quality,CO
+0.001,ugm -3,1000.0,Air Quality,NO
+,Hours,,Weather,Sunshine Hours
+,seconds,,Traffic,Journey Time
+0.001,ugm -3,,Air Quality,PM2.5
+,mm,,Weather,Rainfall
+,m/s,,Weather,Wind Speed
+,m,,Water Level,Water Level
+,Celsius,,Building,Internal Temperature
+,Celsius,,Weather,Dew Point
+0.0001,m,5.0,Water Quality,Depth
+,hpa,,Weather,Pressure
+,V,,Sensor Metrics,Battery
+,%,,Weather,Humidity
+,ppb,,Air Quality,O3
+,Vehicles,,Vehicles,Plates Matching
+,Vehicles,,Vehicles,Plates In
+0.001,ugm -3,,Air Quality,PM 4
+0.001,ugm -3,1000.0,Air Quality,NO2
+,Bearing,,Weather,Wind Direction
+,Celsius,,Weather,Temperature
+,W/m2,,Weather,Solar Radiation
+,ppm,,Air Quality,CO2
+,ugm -3,,Air Quality,Pm10 Concentration
+,Vehicles,,Vehicles,Vehicle Count East
+,Lux,,Light,Luminosity
+,Vehicles,,Vehicles,Bus Count West
+,kg,,Bee Hive,Weight
+,ugm -3,,Air Quality,SO2 Concentration
+,-,,Bee Hive,Hive Activity
+0.001,ugm -3,,Air Quality,NO Concentration
+,%,,Building,Internal Humidity
+,?,,Weather,Rain Acc
+0.0001,QSU,1000.0,Water Quality,Fluorescent Dissolved Organic Matter
+0.0001,mg/l,30.0,Water Quality,NH4+N
+0.0001,mg/l,30.0,Water Quality,NO3-N
+0.001,ugm -3,,Air Quality,Non-volatile PM10
+,?,,Air Quality,Ammonia
+,-,,Bee Hive,Mean Flight Noise
+0.001,db,,Noise,Max Sound
+0.001,ugm -3,,Air Quality,Volatile PM10
+,m,,Water Level,River Level
+,ppm,,Soil,CO2 High Range
+,Vehicles,,Vehicles,Bus Count East
+,m/s,,Weather,Max Wind Speed
+,ugm -3,,Air Quality,Pm2.5 Concentration
+,?,,Weather,RainInt
+,ppm,,Soil,CO2 Low Range
+,%,,Air Quality,Filter
+,Celsius,,Soil,Soil Temperature
+0.001,ugm -3,,Air Quality,NOXasNO2 Concentration
+,Cars,,Traffic,Parking Spaces
+,?,,Air Quality,Odor
+,Vehicles,,Vehicles,Plates Out
+,ugm -3,,Air Quality,Particle Count
+0.0001,uS/cm,2000.0,Water Quality,Specific Conductance
+0.0001,mg/l,18.0,Water Quality,Dissolved Oxygen
+,%,,Traffic,Congestion
+,Passenger Car Units,,Traffic,Traffic Flow
+,KmPH,,Traffic,Average Speed
+,Vehicles,,Traffic,Occupied spaces
+,+kW,,Electrical,Real Power
+,seconds,,Weather,Rain Duration
+,mAOD,,Water Level,Relative River Level
+,m,,Seismic,North-South Horizontal Displacement
+,mAOD,,Water Level,Relative Tidal Level
+,Vehicles,,Vehicles,Truck Count
+,%VWC,,Soil,Soil Moisture
+,mm,,Weather,Daily Accumulation Rainfall

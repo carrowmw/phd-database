@@ -1,0 +1,20 @@
+base_url: "https://newcastle.urbanobservatory.ac.uk/api/v1.1"
+timeout: 100000
+
+time_slice:
+  last_n_days: 7
+  starttime: null
+  endtime: null
+
+location:
+  polygon_wkb: null
+  bbox_p1_x: null
+  bbox_p1_y: null
+  bbox_p2_x: null
+  bbox_p2_y: null
+
+sensor:
+  sensor_type: "Brood"
+  theme: null
+  broker: null
+  data_variable: null
