@@ -1,0 +1,20 @@
+erDiagram
+    SENSORS {
+        int sensor_id PK
+        string sensor_name
+    }
+    VARIABLES {
+        int variable_id PK
+        string variable_name
+        string units
+    }
+    MEASUREMENTS {
+        int measurement_id PK
+        int sensor_id FK
+        int variable_id FK
+        float value
+        timestamp reading_time
+        boolean is_suspect
+    }
+    SENSORS ||--o{ MEASUREMENTS : "generates"
+    VARIABLES ||--o{ MEASUREMENTS : "has"

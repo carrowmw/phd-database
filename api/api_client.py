@@ -1,5 +1,6 @@
 # phd_package/database/api/api_client.py
 
+import os
 from typing import Dict, Any, Optional, List
 import requests
 import json
@@ -46,7 +47,7 @@ class APIConfig:
 
 class ConfigLoader:
     @staticmethod
-    def load_config(config_path: str = "database/api/config.yml") -> APIConfig:
+    def load_config(config_path: str = "./config.yml") -> APIConfig:
         path = Path(config_path)
         if not path.exists():
             return APIConfig()
@@ -85,8 +86,12 @@ class APIError(Exception):
 class APIClient:
     def __init__(self, config_path: Optional[str] = None):
         self.config = ConfigLoader.load_config(config_path) if config_path else APIConfig()
+        if config_path:
+            assert os.path.exists(config_path), f"Config file {config_path} does not exist"
         self.endpoints = APIEndpoints()
         self.session = requests.Session()
+    
+    
     
     def _build_query_params(self, 
                             include_time: bool = False, 
@@ -124,6 +129,41 @@ class APIClient:
                 params['data_variable'] = self.config.sensor.data_variable
 
         return params
+    
+    def _update_config_explicitly(self, 
+                           time_slice_params: Optional[Dict] = None,
+                           location_params: Optional[Dict] = None,
+                           sensor_params: Optional[Dict] = None) -> None:
+        """
+        Internal method to update configuration if parameters are explicitly provided.
+        
+        Args:
+            time_slice_params: Dictionary containing time slice parameters
+            location_params: Dictionary containing location parameters
+            sensor_params: Dictionary containing sensor parameters
+        """
+        # Update time slice config if any parameters provided
+        if time_slice_params and any(time_slice_params.values()):
+            logger.info("Updating time slice parameters with provided values")
+            self.config.time_slice = TimeSliceParams(**time_slice_params)
+        
+        # Update location config if any parameters provided
+        if location_params and any(location_params.values()):
+            logger.info("Updating location parameters with provided values")
+            self.config.location = LocationParams(**location_params)
+        
+        # Update sensor config if any parameters provided
+        if sensor_params and any(sensor_params.values()):
+            logger.info("Updating sensor parameters with provided values")
+            self.config.sensor = SensorParams(**sensor_params)
+        
+        # Log current configuration state
+        if self.config.time_slice:
+            logger.info(f"Current time slice config: {vars(self.config.time_slice)}")
+        if self.config.location:
+            logger.info(f"Current location config: {vars(self.config.location)}")
+        if self.config.sensor:
+            logger.info(f"Current sensor config: {vars(self.config.sensor)}")
 
     def _build_url(self, endpoint: str) -> str:
         """Build full URL for API endpoint"""
@@ -213,9 +253,42 @@ class APIClient:
         response = self._make_request(endpoint)
         return self._handle_json_response(response)
 
-    def get_raw_sensor_data(self) -> Dict[str, Any]:
+    def get_raw_sensor_data(self, 
+                           last_n_days: Optional[int] = None,
+                           starttime: Optional[str] = None,
+                           endtime: Optional[str] = None,
+                           polygon_wkb: Optional[str] = None,
+                           bbox_p1_x: Optional[float] = None,
+                           bbox_p1_y: Optional[float] = None,
+                           bbox_p2_x: Optional[float] = None,
+                           bbox_p2_y: Optional[float] = None,
+                           sensor_type: Optional[str] = None,
+                           theme: Optional[str] = None,
+                           broker: Optional[str] = None,
+                           data_variable: Optional[str] = None) -> Dict[str, Any]:
         """Get raw sensor data with all configured parameters"""
-        """NOTE: This call to the API does not return any data and is likely disabled"""
+        
+        self._update_config_explicitly(
+            time_slice_params={
+                'last_n_days': last_n_days,
+                'starttime': starttime,
+                'endtime': endtime
+            },
+            location_params={
+                'polygon_wkb': polygon_wkb,
+                'bbox_p1_x': bbox_p1_x,
+                'bbox_p1_y': bbox_p1_y,
+                'bbox_p2_x': bbox_p2_x,
+                'bbox_p2_y': bbox_p2_y
+            },
+            sensor_params={
+                'sensor_type': sensor_type,
+                'theme': theme,
+                'broker': broker,
+                'data_variable': data_variable
+            }
+        )
+        
         params = self._build_query_params(
             include_time=True,
             include_location=True,
@@ -227,6 +300,7 @@ class APIClient:
             raise APIError("At least one of sensor_type, theme, or data_variable is required")
         
         response = self._make_request(self.endpoints.RAW_SENSOR_DATA, params)
+        # print(f"DEBUG: Raw sensor data: {self._handle_json_response(response)}")
         return self._handle_json_response(response)
 
     def get_individual_raw_sensor_data(self, sensor_name: str) -> Dict[str, Any]:
@@ -261,9 +335,8 @@ class APIClient:
     def get_list_of_sensor_names(self) -> List[str]:
         """Get a list of available sensor names"""
         sensors = self.get_sensors()
-        print(f"DEBUG: Sensors: {sensors.keys()}")
-        print(f"DEBUG: Sensors: {sensors.get('sensors', [])[0]}")
-        return [item["Name"] for item in sensors.get('sensors', [])]
+        print(f"DEBUG: Sensors: {[item['Sensor Name'] for item in sensors.get('sensors', [])]}")
+        return [item["Sensor Name"] for item in sensors.get('sensors', [])]
     
     def get_list_of_sensor_types(self) -> List[str]:
         """Get a list of available sensor types"""
@@ -275,7 +348,7 @@ class APIClient:
         variables = self.get_variables()
         themes = self.get_themes()
         sensor_types = self.get_sensor_types()
-        with open("database/api/metadata.json", "w") as f:
+        with open("api/metadata/metadata.json", "w") as f:
             json.dump({
                 "variables": variables,
                 "themes": themes,
@@ -284,20 +357,20 @@ class APIClient:
         
         # Create pandas dataframes and save to csv
         variables_df = pd.json_normalize(variables.get('Variables', []))
-        variables_df.to_csv("database/api/variables.csv", index=False)
+        variables_df.to_csv("api/metadata/variables.csv", index=False)
 
         themes_df = pd.json_normalize(themes.get('Themes', []))
         if "Name" in themes_df.columns:
             themes_df["Name"] = themes_df["Name"].apply(lambda x: x["Name"] if isinstance(x, dict) else x)
-        themes_df.to_csv("database/api/themes.csv", index=False)
+        themes_df.to_csv("api/metadata/themes.csv", index=False)
 
         sensor_types_df = pd.json_normalize(sensor_types.get('Variables', []))
-        sensor_types_df.to_csv("database/api/sensor_types.csv", index=False)
+        sensor_types_df.to_csv("api/metadata/sensor_types.csv", index=False)
 
     def print_formatted_metadata(self):
         """Print formatted metadata"""
         try:
-            with open("database/api/metadata.json", "r") as f:
+            with open("api/metadata/metadata.json", "r") as f:
                 metadata = json.load(f)
                 
                 # Handle variables
@@ -341,27 +414,21 @@ class APIClient:
             return None
 
     # Analysis Methods
-    def analyze_json(self, sensor_type: Optional[str] = None, theme: Optional[str] = None, 
-                    broker: Optional[str] = None, data_variable: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def analyze_json(self, 
+                    sensor_type: Optional[str] = None,
+                    theme: Optional[str] = None,
+                    broker: Optional[str] = None,
+                    data_variable: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Analyze JSON structure of raw sensor data"""
         try:
-            # Only update config if parameters are explicitly provided
-            if any([sensor_type, theme, broker, data_variable]):
-                logger.info("Using provided parameters instead of config file values")
-                self.config.sensor = SensorParams(
-                    sensor_type=sensor_type,
-                    theme=theme,
-                    broker=broker,
-                    data_variable=data_variable
-                )
-            else:
-                # Log what parameters are being used from config
-                if self.config.sensor:
-                    logger.info(f"Using config file parameters: "
-                              f"sensor_type={self.config.sensor.sensor_type}, "
-                              f"theme={self.config.sensor.theme}, "
-                              f"broker={self.config.sensor.broker}, "
-                              f"data_variable={self.config.sensor.data_variable}")
+            self._update_config_explicitly(
+                sensor_params={
+                    'sensor_type': sensor_type,
+                    'theme': theme,
+                    'broker': broker,
+                    'data_variable': data_variable
+                }
+            )
             
             json_data = self.get_raw_sensor_data()
             analyzer = JSONAnalyzer()
@@ -374,43 +441,37 @@ class APIClient:
             logger.error(f"Error analyzing JSON: {e}")
             return None
 
-    def get_dataframe(self, sensor_type: Optional[str] = None, theme: Optional[str] = None, broker: Optional[str] = None, data_variable: Optional[str] = None) -> Optional[pd.DataFrame]:
-        """Convert raw sensor data to pandas DataFrame"""
-        try:
-            json_data = self.get_raw_sensor_data()
-            df = pd.json_normalize(json_data)
-            
-            logger.info(f"DataFrame columns: {df.columns}")
-            logger.info(f"DataFrame dtypes: {df.dtypes}")
-            
-            return df
-        except Exception as e:
-            logger.error(f"Error creating DataFrame: {e}")
-            return None
-
-    def get_schema(self, sensor_type: Optional[str] = None, theme: Optional[str] = None, broker: Optional[str] = None, data_variable: Optional[str] = None) -> Optional[Dict[str, Any]]:
-        """Generate JSON schema from raw sensor data"""
-        try:
-            json_data = self.get_raw_sensor_data()
-            builder = genson.SchemaBuilder()
-            builder.add_object(json_data)
-            schema = builder.to_schema()
-            
-            logger.info(f"Generated JSON Schema: {schema}")
-            return schema
-        except Exception as e:
-            logger.error(f"Error generating schema: {e}")
-            return None
+    def get_themes_df(self) -> pd.DataFrame:
+        """Get themes as a pandas dataframe"""
+        if not os.path.exists("api/metadata/themes.csv"):
+            self.store_metadata()
+        themes = pd.read_csv("api/metadata/themes.csv")
+        return themes
+    
+    def get_variables_df(self) -> pd.DataFrame:
+        """Get variables as a pandas dataframe"""
+        if not os.path.exists("api/metadata/variables.csv"):
+            self.store_metadata()
+        variables = pd.read_csv("api/metadata/variables.csv")
+        return variables
+    
+    def get_sensor_types_df(self) -> pd.DataFrame:
+        """Get sensor types as a pandas dataframe"""
+        if not os.path.exists("api/metadata/sensor_types.csv"):
+            self.store_metadata()
+        sensor_types = pd.read_csv("api/metadata/sensor_types.csv")
+        return sensor_types
 
 def main():
     try:
-        client = APIClient("database/api/config.yml")
+        client = APIClient("api/config.yml")
         # This will now use the config from config.yml
-        client.analyze_json()
+        # client.analyze_json()
         client.store_metadata()
         client.print_formatted_metadata()
-
-        client.get_list_of_sensor_names()
+        # client.get_raw_sensor_data()
+        # client.get_flattend_measurements()
+        # client.get_list_of_sensor_names()
     except APIError as e:
         logger.error(f"API Error: {e}")
     except Exception as e:
